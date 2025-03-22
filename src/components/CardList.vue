@@ -5,6 +5,9 @@ defineProps({
   items: Array,
 })
 
+// emmit используем при прокидывании function
+const emmit = defineEmits(['addToFavorite'])
+
 const onClickAdd = () => {
   alert('Добавить в корзину')
 }
@@ -15,11 +18,12 @@ const onClickAdd = () => {
     <li v-for="item in items" :key="item.id">
       <CardSneakers
         :image-url="item.imageUrl"
+        :id="item.id"
         :title="item.title"
         :price="item.price"
-        :is-added="false"
-        :is-favorite="false"
+        :is-favorite="item.isFavorite"
         :onClickAdd="onClickAdd"
+        :onClickFavorite="() => emmit('addToFavorite', item)"
       />
     </li>
   </ul>

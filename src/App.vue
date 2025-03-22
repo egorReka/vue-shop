@@ -20,6 +20,43 @@ const onChangeSearchInput = (evt) => {
   filters.searchQuery = evt.target.value
 }
 
+const fatchFavorites = () => {
+  fetch(`https://f6f031af57a38201.mokky.dev/favorites`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`)
+      }
+
+      return response.json()
+    })
+    .then((favorites) => {
+      items.value = items.value.map((item) => {
+        const favorite = favorites.find((favorite) => favorite.parentId === item.id)
+
+        if (!favorite) {
+          return item
+        }
+
+        return {
+          ...item,
+          isFavorite: true,
+          favoriteId: favorite.id,
+        }
+      })
+
+      console.table(items.value)
+    })
+    .catch((error) => {
+      console.error('Ошибка при получении данных:', error)
+    })
+}
+
+const addToFavorite = (item) => {
+  item.isFavorite = !item.isFavorite
+
+  console.log(item)
+}
+
 const fetchItems = () => {
   const params = {
     sortBy: filters.sortBy,
@@ -51,14 +88,22 @@ const fetchItems = () => {
       return response.json()
     })
     .then((data) => {
-      items.value = data
+      items.value = data.map((item) => ({
+        ...item,
+        isAdded: false,
+        isFavorite: false,
+      }))
     })
     .catch((error) => {
       console.error('Ошибка при получении данных:', error)
     })
 }
 
-onMounted(fetchItems)
+onMounted(async () => {
+  await fetchItems()
+  await fatchFavorites()
+})
+
 watch(filters, fetchItems)
 </script>
 
@@ -96,7 +141,7 @@ watch(filters, fetchItems)
               </div>
             </header>
 
-            <CardList :items="items" />
+            <CardList :items="items" @addToFavorite="addToFavorite" />
           </div>
         </section>
       </main>
