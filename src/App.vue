@@ -44,17 +44,61 @@ const fatchFavorites = () => {
         }
       })
 
-      console.table(items.value)
+      console.table(items.value) // TODO del
     })
     .catch((error) => {
       console.error('Ошибка при получении данных:', error)
     })
 }
 
-const addToFavorite = (item) => {
-  item.isFavorite = !item.isFavorite
+const addToFavorite = async (item) => {
+  if (!item.favoriteId) {
+    const obj = {
+      parentId: item.id,
+    }
 
-  console.log(item)
+    item.isFavorite = true
+
+    fetch(`https://f6f031af57a38201.mokky.dev/favorites`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8',
+      },
+      body: JSON.stringify(obj),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`)
+        }
+
+        return response.json()
+      })
+      .then((result) => {
+        item.favoriteId = result.id
+      })
+      .catch((error) => {
+        console.error('Ошибка при отправке данных:', error)
+      })
+  } else {
+    item.isFavorite = false
+
+    fetch(`https://f6f031af57a38201.mokky.dev/favorites/${item.favoriteId}`, {
+      method: 'DELETE',
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`)
+        }
+
+        return response.text()
+      })
+      .then(() => {
+        item.favoriteId = null
+      })
+      .catch((error) => {
+        console.error('Ошибка при удалении данных:', error)
+      })
+  }
 }
 
 const fetchItems = () => {
@@ -92,6 +136,7 @@ const fetchItems = () => {
         ...item,
         isAdded: false,
         isFavorite: false,
+        favoriteId: null,
       }))
     })
     .catch((error) => {
