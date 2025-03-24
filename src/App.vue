@@ -1,11 +1,83 @@
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, provide, computed } from 'vue'
 
 import AppHeader from './components/AppHeader.vue'
 import CardList from './components/CardList.vue'
 import Drawer from './components/Drawer.vue'
 
 const items = ref([])
+const cart = ref([])
+const cartOpen = ref(false)
+const totalPrice = computed(() => cart.value.reduce((acc, item) => acc + item.price, 0))
+const isCreatingOrder = ref(false)
+
+const onClickOpenCart = () => {
+  cartOpen.value = true
+}
+
+const onClickCloseCart = () => {
+  cartOpen.value = false
+}
+
+const addToCart = (item) => {
+  cart.value.push(item)
+  item.isAdded = true
+}
+
+const removeFromCart = (item) => {
+  cart.value.splice(cart.value.indexOf(item), 1)
+  item.isAdded = false
+}
+
+const onClickAddPlus = (item) => {
+  if (!item.isAdded) {
+    addToCart(item)
+  } else {
+    removeFromCart(item)
+  }
+}
+
+const createOrder = () => {
+  const obj = {
+    items: cart.value,
+    totalPrice: totalPrice.value,
+  }
+
+  isCreatingOrder.value = true
+
+  fetch(`https://f6f031af57a38201.mokky.dev/orders`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+    body: JSON.stringify(obj),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`)
+      }
+
+      return response.json()
+    })
+    .then(() => {
+      cart.value = []
+    })
+    .catch((error) => {
+      console.error('Ошибка при отправке данных в orders:', error)
+    })
+    .finally(() => {
+      isCreatingOrder.value = false
+    })
+}
+
+const cartIsEmpty = computed(() => cart.value.length === 0)
+const disabledButton = computed(() => isCreatingOrder.value || cartIsEmpty.value)
+
+provide('cart', {
+  cart,
+  addToCart,
+  removeFromCart,
+})
 
 const filters = reactive({
   sortBy: '',
@@ -43,15 +115,13 @@ const fatchFavorites = () => {
           favoriteId: favorite.id,
         }
       })
-
-      console.table(items.value) // TODO del
     })
     .catch((error) => {
       console.error('Ошибка при получении данных:', error)
     })
 }
 
-const addToFavorite = async (item) => {
+const addToFavorite = (item) => {
   if (!item.favoriteId) {
     const obj = {
       parentId: item.id,
@@ -134,7 +204,7 @@ const fetchItems = () => {
     .then((data) => {
       items.value = data.map((item) => ({
         ...item,
-        isAdded: false,
+        isAdded: cart.value.some((cartItem) => cartItem.id === item.id),
         isFavorite: false,
         favoriteId: null,
       }))
@@ -145,9 +215,27 @@ const fetchItems = () => {
 }
 
 onMounted(async () => {
+  const localCart = localStorage.getItem('cart')
+  cart.value = localCart ? JSON.parse(localCart) : []
+
   await fetchItems()
   await fatchFavorites()
 })
+
+watch(cart, () => {
+  items.value = items.value.map((item) => ({
+    ...item,
+    isAdded: false,
+  }))
+})
+
+watch(
+  cart,
+  () => {
+    localStorage.setItem('cart', JSON.stringify(cart.value))
+  },
+  { deep: true },
+)
 
 watch(filters, fetchItems)
 </script>
@@ -155,7 +243,7 @@ watch(filters, fetchItems)
 <template>
   <div class="bg-[#E7F6FF] p-10">
     <div class="grid grid-rows-[auto_1fr] bg-white min-h-screen rounded-3xl">
-      <AppHeader />
+      <AppHeader @onClickOpenCart="onClickOpenCart" :totalPrice="totalPrice" />
 
       <main>
         <!-- <div class="hero"></div> -->
@@ -186,12 +274,19 @@ watch(filters, fetchItems)
               </div>
             </header>
 
-            <CardList :items="items" @addToFavorite="addToFavorite" />
+            <CardList :items="items" @addToFavorite="addToFavorite" @addToCart="onClickAddPlus" />
           </div>
         </section>
       </main>
 
-      <!-- <Drawer /> -->
+      <Drawer
+        v-if="cartOpen"
+        :totalPrice="totalPrice"
+        @onClickCloseCart="onClickCloseCart"
+        @createOrder="createOrder"
+        :disabledButton="disabledButton"
+        :isCreatingOrder="isCreatingOrder.value"
+      />
     </div>
   </div>
 </template>

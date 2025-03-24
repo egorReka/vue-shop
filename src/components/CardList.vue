@@ -6,11 +6,7 @@ defineProps({
 })
 
 // emmit используем при прокидывании function
-const emmit = defineEmits(['addToFavorite'])
-
-const onClickAdd = () => {
-  alert('Добавить в корзину')
-}
+const emmit = defineEmits(['addToFavorite', 'addToCart'])
 </script>
 
 <template>
@@ -22,8 +18,9 @@ const onClickAdd = () => {
         :title="item.title"
         :price="item.price"
         :is-favorite="item.isFavorite"
-        :onClickAdd="onClickAdd"
+        :onClickAdd="() => emmit('addToCart', item)"
         :onClickFavorite="() => emmit('addToFavorite', item)"
+        :isAdded="item.isAdded"
       />
     </li>
   </ul>

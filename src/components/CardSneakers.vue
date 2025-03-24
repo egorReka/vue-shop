@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   id: Number,
   title: String,
   imageUrl: String,
