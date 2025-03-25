@@ -10,7 +10,7 @@ const emmit = defineEmits(['addToFavorite', 'addToCart'])
 </script>
 
 <template>
-  <ul class="grid grid-cols-[repeat(auto-fit,_minmax(180px,_1fr))] gap-4">
+  <ul class="grid grid-cols-[repeat(auto-fill,_minmax(180px,_1fr))] gap-4">
     <li v-for="item in items" :key="item.id">
       <CardSneakers
         :image-url="item.imageUrl"

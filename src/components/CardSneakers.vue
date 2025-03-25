@@ -12,11 +12,15 @@ defineProps({
 </script>
 
 <template>
-  <a
+  <div
     class="relative grid items-start content-start h-full max-w-[400px] border border-slate-100 rounded-3xl p-8 hover:-translate-y-2 transition-all hover:shadow-2xl"
-    href="#"
   >
-    <button @click="onClickFavorite" class="absolute top-8 left-8 cursor-pointer" type="button">
+    <button
+      v-if="onClickFavorite"
+      @click="onClickFavorite"
+      class="absolute top-8 left-8 cursor-pointer"
+      type="button"
+    >
       <img
         :src="isFavorite ? '/like-2.svg' : '/like-1.svg'"
         width="32"
@@ -43,5 +47,5 @@ defineProps({
         />
       </button>
     </div>
-  </a>
+  </div>
 </template>
