@@ -34,7 +34,7 @@ onMounted(async () => {
     <div class="mx-auto px-20 max-w-7xl w-full">
       <h2 class="text-3xl font-bold mb-8">Мои закладки</h2>
 
-      <CardList :items="favorites" @addToCart="onClickAddPlus" />
+      <CardList :items="favorites" @addToCart="onClickAddPlus" isFavorites />
     </div>
   </section>
 </template>

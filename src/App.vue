@@ -7,64 +7,85 @@ import Drawer from './components/Drawer.vue'
 
 const cart = ref([])
 const cartOpen = ref(false)
-const isCreatingOrder = ref(false)
 
 const totalPrice = computed(() => cart.value.reduce((acc, item) => acc + item.price, 0))
-const cartIsEmpty = computed(() => cart.value.length === 0)
-const disabledButton = computed(() => isCreatingOrder.value || cartIsEmpty.value)
 
 const addToFavorite = (item) => {
+  if (item.isProcessing) {
+    return
+  }
+
+  item.isProcessing = true
+  item.isFavorite = true
+
+  const obj = {
+    parentId: item.id,
+    item,
+  }
+
+  fetch(`https://f6f031af57a38201.mokky.dev/favorites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8',
+    },
+    body: JSON.stringify(obj),
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`)
+      }
+
+      return response.json()
+    })
+    .then((result) => {
+      item.favoriteId = result.id
+    })
+    .catch((error) => {
+      console.error('Ошибка при отправке данных:', error)
+    })
+    .finally(() => {
+      item.isProcessing = false
+    })
+}
+
+const removeFromFavorite = (item) => {
+  if (item.isProcessing) {
+    return
+  }
+
+  item.isProcessing = true
+  item.isFavorite = false
+
+  fetch(`https://f6f031af57a38201.mokky.dev/favorites/${item.favoriteId}`, {
+    method: 'DELETE',
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`)
+      }
+
+      return response.text()
+    })
+    .then(() => {
+      item.favoriteId = null
+    })
+    .catch((error) => {
+      console.error('Ошибка при удалении данных:', error)
+    })
+    .finally(() => {
+      item.isProcessing = false
+    })
+}
+
+const onClickButtonFavorite = (item) => {
   if (!item.favoriteId) {
-    const obj = {
-      parentId: item.id,
-      item,
-    }
-
-    item.isFavorite = true
-
-    fetch(`https://f6f031af57a38201.mokky.dev/favorites`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
-      body: JSON.stringify(obj),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`)
-        }
-
-        return response.json()
-      })
-      .then((result) => {
-        item.favoriteId = result.id
-      })
-      .catch((error) => {
-        console.error('Ошибка при отправке данных:', error)
-      })
+    addToFavorite(item)
   } else {
-    item.isFavorite = false
-
-    fetch(`https://f6f031af57a38201.mokky.dev/favorites/${item.favoriteId}`, {
-      method: 'DELETE',
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`)
-        }
-
-        return response.text()
-      })
-      .then(() => {
-        item.favoriteId = null
-      })
-      .catch((error) => {
-        console.error('Ошибка при удалении данных:', error)
-      })
+    removeFromFavorite(item)
   }
 }
 
-provide('favorite', { addToFavorite })
+provide('favorite', { onClickButtonFavorite })
 
 const onClickAddPlus = (item) => {
   if (!item.isAdded) {
@@ -92,39 +113,6 @@ const removeFromCart = (item) => {
   item.isAdded = false
 }
 
-const createOrder = () => {
-  const obj = {
-    items: cart.value,
-    totalPrice: totalPrice.value,
-  }
-
-  isCreatingOrder.value = true
-
-  fetch(`https://f6f031af57a38201.mokky.dev/orders`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-    },
-    body: JSON.stringify(obj),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status}`)
-      }
-
-      return response.json()
-    })
-    .then(() => {
-      cart.value = []
-    })
-    .catch((error) => {
-      console.error('Ошибка при отправке данных в orders:', error)
-    })
-    .finally(() => {
-      isCreatingOrder.value = false
-    })
-}
-
 provide('cart', {
   cart,
   addToCart,
@@ -150,14 +138,7 @@ watch(
         <router-view></router-view>
       </main>
 
-      <Drawer
-        v-if="cartOpen"
-        :totalPrice="totalPrice"
-        @onClickCloseCart="onClickCloseCart"
-        @createOrder="createOrder"
-        :disabledButton="disabledButton"
-        :isCreatingOrder="isCreatingOrder.value"
-      />
+      <Drawer v-if="cartOpen" :totalPrice="totalPrice" @onClickCloseCart="onClickCloseCart" />
     </div>
   </div>
 </template>

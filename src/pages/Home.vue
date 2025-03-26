@@ -1,82 +1,25 @@
 <script setup>
+import debounce from '@/utils/debounce.js'
+
 import { inject, reactive, watch, ref, onMounted } from 'vue'
 import CardList from '../components/CardList.vue'
 
 const items = ref([])
 const { cart, onClickAddPlus } = inject('cart')
-const { addToFavorite } = inject('favorite')
+const { onClickButtonFavorite } = inject('favorite')
 
 const filters = reactive({
   sortBy: '',
   searchQuery: '',
 })
 
-const onChangeSearchInput = (evt) => {
+const onChangeSearchInput = debounce((evt) => {
   filters.searchQuery = evt.target.value
-}
+})
 
 const onChangeSort = (evt) => {
   filters.sortBy = evt.target.value
 }
-
-// const addToFavorite = (item) => {
-//   if (!item.favoriteId) {
-//     const obj = {
-//       parentId: item.id,
-//       item,
-//     }
-
-//     item.isFavorite = true
-
-//     fetch(`https://f6f031af57a38201.mokky.dev/favorites`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json;charset=utf-8',
-//       },
-//       body: JSON.stringify(obj),
-//     })
-//       .then((response) => {
-//         if (!response.ok) {
-//           throw new Error(`Ошибка HTTP: ${response.status}`)
-//         }
-
-//         return response.json()
-//       })
-//       .then((result) => {
-//         item.favoriteId = result.id
-//       })
-//       .catch((error) => {
-//         console.error('Ошибка при отправке данных:', error)
-//       })
-//   } else {
-//     item.isFavorite = false
-
-//     fetch(`https://f6f031af57a38201.mokky.dev/favorites/${item.favoriteId}`, {
-//       method: 'DELETE',
-//     })
-//       .then((response) => {
-//         if (!response.ok) {
-//           throw new Error(`Ошибка HTTP: ${response.status}`)
-//         }
-
-//         return response.text()
-//       })
-//       .then(() => {
-//         item.favoriteId = null
-//       })
-//       .catch((error) => {
-//         console.error('Ошибка при удалении данных:', error)
-//       })
-//   }
-// }
-
-// const onClickAddPlus = (item) => {
-//   if (!item.isAdded) {
-//     addToCart(item)
-//   } else {
-//     removeFromCart(item)
-//   }
-// }
 
 const fatchFavorites = () => {
   fetch(`https://f6f031af57a38201.mokky.dev/favorites`)
@@ -197,7 +140,11 @@ watch(filters, fetchItems)
         </div>
       </header>
 
-      <CardList :items="items" @addToFavorite="addToFavorite" @addToCart="onClickAddPlus" />
+      <CardList
+        :items="items"
+        @onClickButtonFavorite="onClickButtonFavorite"
+        @addToCart="onClickAddPlus"
+      />
     </div>
   </section>
 </template>

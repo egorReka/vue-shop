@@ -1,13 +1,13 @@
 <script setup>
 defineProps({
-  id: Number,
   title: String,
   imageUrl: String,
   price: Number,
   isFavorite: Boolean,
+  isProcessing: Boolean,
   isAdded: Boolean,
   onClickAdd: Function,
-  onClickFavorite: Function,
+  onClickButtonFavorite: Function,
 })
 </script>
 
@@ -16,8 +16,9 @@ defineProps({
     class="relative grid items-start content-start h-full max-w-[400px] border border-slate-100 rounded-3xl p-8 hover:-translate-y-2 transition-all hover:shadow-2xl"
   >
     <button
-      v-if="onClickFavorite"
-      @click="onClickFavorite"
+      v-if="onClickButtonFavorite"
+      :disabled="isProcessing"
+      @click="onClickButtonFavorite"
       class="absolute top-8 left-8 cursor-pointer"
       type="button"
     >

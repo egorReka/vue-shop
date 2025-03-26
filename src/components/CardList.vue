@@ -3,10 +3,11 @@ import CardSneakers from './CardSneakers.vue'
 
 defineProps({
   items: Array,
+  isFavorites: Boolean,
 })
 
 // emmit используем при прокидывании function
-const emmit = defineEmits(['addToFavorite', 'addToCart'])
+const emmit = defineEmits(['onClickButtonFavorite', 'addToCart'])
 </script>
 
 <template>
@@ -17,9 +18,10 @@ const emmit = defineEmits(['addToFavorite', 'addToCart'])
         :id="item.id"
         :title="item.title"
         :price="item.price"
+        :is-processing="item.isProcessing"
         :is-favorite="item.isFavorite"
         :onClickAdd="() => emmit('addToCart', item)"
-        :onClickFavorite="() => emmit('addToFavorite', item)"
+        :onClickButtonFavorite="isFavorites ? null : () => emmit('onClickButtonFavorite', item)"
         :isAdded="item.isAdded"
       />
     </li>
