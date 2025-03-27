@@ -131,14 +131,16 @@ watch(
 
 <template>
   <div class="bg-[#E7F6FF] p-10">
-    <div class="grid grid-rows-[auto_1fr] bg-white min-h-screen rounded-3xl">
-      <AppHeader @onClickOpenCart="onClickOpenCart" :totalPrice="totalPrice" />
+    <div
+      class="grid grid-rows-[auto_1fr] bg-white min-h-screen rounded-3xl max-w-7xl mx-auto w-full"
+    >
+      <AppHeader @on-click-open-cart="onClickOpenCart" :total-price="totalPrice" />
 
       <main>
         <router-view></router-view>
       </main>
 
-      <Drawer v-if="cartOpen" :totalPrice="totalPrice" @onClickCloseCart="onClickCloseCart" />
+      <Drawer v-if="cartOpen" :total-price="totalPrice" @on-click-close-cart="onClickCloseCart" />
     </div>
   </div>
 </template>

@@ -20,9 +20,9 @@ const emmit = defineEmits(['onClickButtonFavorite', 'addToCart'])
         :price="item.price"
         :is-processing="item.isProcessing"
         :is-favorite="item.isFavorite"
-        :onClickAdd="() => emmit('addToCart', item)"
-        :onClickButtonFavorite="isFavorites ? null : () => emmit('onClickButtonFavorite', item)"
-        :isAdded="item.isAdded"
+        :on-click-add="() => emmit('addToCart', item)"
+        :on-click-button-favorite="isFavorites ? null : () => emmit('onClickButtonFavorite', item)"
+        :is-added="item.isAdded"
       />
     </li>
   </ul>

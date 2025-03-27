@@ -8,14 +8,14 @@ defineProps({
 
 <template>
   <header class="flex justify-between items-center py-4 border-b border-slate-300">
-    <div class="flex justify-between items-center gap-4 mx-auto px-20 max-w-7xl w-full">
+    <div class="flex justify-between items-center gap-4 mx-auto px-20 w-full">
       <RouterLink to="/">
         <div class="grid grid-cols-[auto_1fr] items-center gap-4">
           <img
-            class="block max-w-full h-auto min-w-10 h-10"
+            class="block max-w-full min-w-10 h-10"
             src="/logo.png"
-            width="40"
-            height="40"
+            width="60"
+            height="60"
             alt="Logo."
           />
           <div>

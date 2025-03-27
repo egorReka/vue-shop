@@ -115,11 +115,11 @@ watch(filters, fetchItems)
   <!-- <div class="hero"></div> -->
 
   <section class="py-10">
-    <div class="mx-auto px-20 max-w-7xl w-full">
+    <div class="mx-auto px-20">
       <header class="flex items-center justify-between gap-4 mb-8">
         <h2 class="text-3xl font-bold">Все кроссовки</h2>
 
-        <div class="flex items-center gap-8">
+        <div class="flex flex-wrap items-center justify-end gap-8">
           <select @change="onChangeSort" aria-label="Сортировка">
             <option selected value="name">По названию</option>
             <option value="price">По цене (дешевые)</option>
@@ -142,8 +142,8 @@ watch(filters, fetchItems)
 
       <CardList
         :items="items"
-        @onClickButtonFavorite="onClickButtonFavorite"
-        @addToCart="onClickAddPlus"
+        @on-click-button-favorite="onClickButtonFavorite"
+        @add-to-cart="onClickAddPlus"
       />
     </div>
   </section>
